@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:sec="http://www.springframework.org/schema/security"
+	xsi:schemaLocation="
+      http://www.springframework.org/schema/security
+      http://www.springframework.org/schema/security/spring-security-3.2.xsd
+      http://www.springframework.org/schema/beans
+      http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+
+	<http realm="Protected API" use-expressions="true"
+		auto-config="false" create-session="stateless" entry-point-ref="unauthorizedEntryPoint"
+		authentication-manager-ref="authenticationManager">
+		<custom-filter ref="authenticationTokenProcessingFilter" position="PRE_AUTH_FILTER" />
+		<intercept-url pattern="/accessPublic/**" access="permitAll"  method="POST"/>
+	</http>
+	
+	<beans:bean id="userDao" class="com.mx.xpertys.dto.JpaUserDao"></beans:bean> 
+
+	<beans:bean id="passwordEncoder" 
+	            class="org.springframework.security.crypto.password.StandardPasswordEncoder">
+		<beans:constructor-arg value="x9ajDR$#Qkr91" />
+	</beans:bean>
+	
+	<!-- <beans:bean id="passwordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/> -->
+
+	<authentication-manager id="authenticationManager">
+		<authentication-provider user-service-ref="userDao">
+			<password-encoder ref="passwordEncoder"></password-encoder>
+		</authentication-provider>
+	</authentication-manager>
+
+	<beans:bean
+		class="com.mx.xpertys.security.config.AuthenticationTokenProcessingFilter"
+		id="authenticationTokenProcessingFilter">
+		<beans:constructor-arg ref="userDao" />
+	</beans:bean>
+	
+	<beans:bean class="com.mx.xpertys.security.config.UnauthorizedEntryPoint"
+		id="unauthorizedEntryPoint"></beans:bean>
+
+</beans:beans>
